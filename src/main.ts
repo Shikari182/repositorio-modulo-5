@@ -100,13 +100,24 @@ const actualizarPuntuacion = (nuevaPuntuacion: number): void => {
  * Si la puntuación es mayor a 7.5, muestra un mensaje de Game Over y bloquea todos los botones salvo "nuevaPartida".
  * Si la puntuación es exactamente 7.5, muestra el mensaje de victoria y bloquea el juego salvo "nuevaPartida".
  */
+
+const bloquearBotonDameCarta = (estaBloqueado: boolean) => {
+  const botonDameCarta = document.getElementById('');
+
+  if (botonDameCarta !== null && botonDameCarta !== undefined && botonDameCarta instanceof HTMLButtonElement) {
+    botonDameCarta.disabled = estaBloqueado;
+  }
+}
+
 const gestionarPartida = (): void => {
   if (puntuacion > 7.5) {
     alert("Game Over! Te has pasado de 7 y medio");
-    bloquearBotones();
+    // bloquearBotones();
+    bloquearBotonDameCarta(true);
   } else if (puntuacion === 7.5) {
     alert("¡Lo has clavado! ¡Enhorabuena!");
-    bloquearBotones();
+    // bloquearBotones();
+    bloquearBotonDameCarta(true);
   }
 };
 
@@ -127,47 +138,31 @@ function obtenerMensajePlantarse(puntos: number): string {
   }
 }
 
-/**
- * Función para mostrar la carta por defecto (boca abajo).
- */
-function mostrarCartaDefecto(): void {
-  mostrarUrlCarta(
-    "https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg"
-  );
-}
-
-/**
- * Función que bloquea todos los botones del juego, excepto el botón de "nuevaPartida".
- */
-function bloquearBotones(): void {
-  const botones = document.querySelectorAll("button");
-  botones.forEach((boton) => {
-    if (boton instanceof HTMLButtonElement && boton.id !== "nuevaPartida") {
-      boton.disabled = true;
-    }
-  });
-}
 
 // ----------------- EVENTOS -----------------
+
+const pedirCarta = () => {
+  const numeroAleatorio = dameNumeroAleatorio();
+  const carta = dameCarta(numeroAleatorio);
+  console.log(`Carta pedida: ${carta}`);
+
+  // Mostrar la carta en la interfaz
+  const urlCarta = obtenerUrlCarta(carta);
+  mostrarUrlCarta(urlCarta);
+
+  // Obtener y sumar los puntos de la carta
+  const puntosCarta = obtenerPuntosCarta(carta);
+  const puntosSumados = sumarPuntos(puntosCarta);
+  actualizarPuntuacion(puntosSumados);
+  muestraPuntuacion();
+  gestionarPartida();
+}
 
 // Botón "Pedir Carta"
 const botonPedirCarta = document.getElementById("pedirCarta");
 if (botonPedirCarta instanceof HTMLButtonElement) {
   botonPedirCarta.addEventListener("click", () => {
-    const numeroAleatorio = dameNumeroAleatorio();
-    const carta = dameCarta(numeroAleatorio);
-    console.log(`Carta pedida: ${carta}`);
-
-    // Mostrar la carta en la interfaz
-    const urlCarta = obtenerUrlCarta(carta);
-    mostrarUrlCarta(urlCarta);
-
-    // Obtener y sumar los puntos de la carta
-    const puntosCarta = obtenerPuntosCarta(carta);
-    const puntosSumados = sumarPuntos(puntosCarta);
-    actualizarPuntuacion(puntosSumados);
-    muestraPuntuacion();
-    gestionarPartida();
+    pedirCarta();
   });
 }
 
@@ -242,9 +237,10 @@ if (botonNuevaPartida instanceof HTMLButtonElement) {
     // Reiniciamos la puntuación y el estado del juego usando las funciones ya creadas
     actualizarPuntuacion(0);
     muestraPuntuacion();
-
     // Reestablecemos la carta por defecto
-    mostrarCartaDefecto();
+    mostrarUrlCarta(
+      "https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg"
+    );
 
     // Rehabilitamos los botones de juego
     const botonPedir = document.getElementById("pedirCarta");
