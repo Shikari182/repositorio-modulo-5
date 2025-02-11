@@ -97,18 +97,56 @@ const actualizarPuntuacion = (nuevaPuntuacion: number): void => {
 
 /**
  * Gestiona el estado de la partida.
- * Si la puntuación es mayor a 7.5, muestra un mensaje de Game Over y deshabilita todos los botones.
- * Si la puntuación es exactamente 7.5, muestra el mensaje de victoria y deshabilita el juego.
+ * Si la puntuación es mayor a 7.5, muestra un mensaje de Game Over y bloquea todos los botones salvo "nuevaPartida".
+ * Si la puntuación es exactamente 7.5, muestra el mensaje de victoria y bloquea el juego salvo "nuevaPartida".
  */
 const gestionarPartida = (): void => {
   if (puntuacion > 7.5) {
     alert("Game Over! Te has pasado de 7 y medio");
-    deshabilitarJuego();
+    bloquearBotones();
   } else if (puntuacion === 7.5) {
     alert("¡Lo has clavado! ¡Enhorabuena!");
-    deshabilitarJuego();
+    bloquearBotones();
   }
 };
+
+/**
+ * Función que retorna el mensaje según la puntuación al plantarse.
+ */
+function obtenerMensajePlantarse(puntos: number): string {
+  if (puntos < 4) {
+    return "Has sido muy conservador.";
+  } else if (puntos === 5) {
+    return "Te ha entrado el canguelo eh?";
+  } else if (puntos === 6 || puntos === 7) {
+    return "Casi casi...";
+  } else if (puntos === 7.5) {
+    return "¡Lo has clavado! ¡Enhorabuena!";
+  } else {
+    return `Te has plantado con ${puntos} puntos.`;
+  }
+}
+
+/**
+ * Función para mostrar la carta por defecto (boca abajo).
+ */
+function mostrarCartaDefecto(): void {
+  mostrarUrlCarta(
+    "https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg"
+  );
+}
+
+/**
+ * Función que bloquea todos los botones del juego, excepto el botón de "nuevaPartida".
+ */
+function bloquearBotones(): void {
+  const botones = document.querySelectorAll("button");
+  botones.forEach((boton) => {
+    if (boton instanceof HTMLButtonElement && boton.id !== "nuevaPartida") {
+      boton.disabled = true;
+    }
+  });
+}
 
 // ----------------- EVENTOS -----------------
 
@@ -139,7 +177,8 @@ const botonCartaSiguiente = document.getElementById("cartaSiguiente");
 if (botonCartaSiguiente instanceof HTMLButtonElement) {
   botonCartaSiguiente.disabled = true;
   botonCartaSiguiente.addEventListener("click", () => {
-    const cartaFinal = dameCartaFinal();
+    // En lugar de usar una función eliminada, usamos las funciones existentes:
+    const cartaFinal = dameCarta(dameNumeroAleatorio());
     const urlCartaFinal = obtenerUrlCarta(cartaFinal);
     mostrarUrlCarta(urlCartaFinal);
     const puntosCartaFinal = obtenerPuntosCarta(cartaFinal);
@@ -168,17 +207,8 @@ if (botonCartaSiguiente instanceof HTMLButtonElement) {
 const botonPlantarse = document.getElementById("plantarse");
 if (botonPlantarse instanceof HTMLButtonElement) {
   botonPlantarse.addEventListener("click", () => {
-    if (puntuacion < 4) {
-      alert("Has sido muy conservador.");
-    } else if (puntuacion === 5) {
-      alert("Te ha entrado el canguelo eh?");
-    } else if (puntuacion === 6 || puntuacion === 7) {
-      alert("Casi casi...");
-    } else if (puntuacion === 7.5) {
-      alert("¡Lo has clavado! ¡Enhorabuena!");
-    } else {
-      alert(`Te has plantado con ${puntuacion} puntos.`);
-    }
+    // Se ha extraído la lógica a la función obtenerMensajePlantarse
+    alert(obtenerMensajePlantarse(puntuacion));
     // Al plantarse se deshabilitan los botones de pedir carta y plantarse,
     // y se habilita el botón de "¿Cuál hubiese sido mi próxima carta?" para usarse una única vez.
     deshabilitarJuegoPlantarse();
@@ -205,53 +235,30 @@ function deshabilitarJuegoPlantarse(): void {
   }
 }
 
-/**
- * Deshabilita todos los botones del juego.
- */
-function deshabilitarJuego(): void {
-  const botonPedir = document.getElementById("pedirCarta");
-  const botonCartaSiguiente = document.getElementById("cartaSiguiente");
-  const botonPlantarse = document.getElementById("plantarse");
-
-  if (
-    botonPedir instanceof HTMLButtonElement &&
-    botonCartaSiguiente instanceof HTMLButtonElement &&
-    botonPlantarse instanceof HTMLButtonElement
-  ) {
-    botonPedir.disabled = true;
-    botonCartaSiguiente.disabled = true;
-    botonPlantarse.disabled = true;
-  }
-}
-
-function dameCartaFinal(): number {
-  const numeroAleatorio = Math.floor(Math.random() * 10) + 1;
-  return numeroAleatorio > 7 ? numeroAleatorio + 2 : numeroAleatorio;
-}
-
 // Botón "Nueva Partida"
 const botonNuevaPartida = document.getElementById("nuevaPartida");
 if (botonNuevaPartida instanceof HTMLButtonElement) {
   botonNuevaPartida.addEventListener("click", () => {
-    // Reiniciamos la puntuación y el estado del juego
-    puntuacion = 0;
+    // Reiniciamos la puntuación y el estado del juego usando las funciones ya creadas
+    actualizarPuntuacion(0);
     muestraPuntuacion();
+
+    // Reestablecemos la carta por defecto
+    mostrarCartaDefecto();
+
+    // Rehabilitamos los botones de juego
     const botonPedir = document.getElementById("pedirCarta");
     const botonCartaSiguiente = document.getElementById("cartaSiguiente");
     const botonPlantarse = document.getElementById("plantarse");
-    const img = document.getElementById("cartaImagen");
 
     if (
       botonPedir instanceof HTMLButtonElement &&
       botonCartaSiguiente instanceof HTMLButtonElement &&
-      botonPlantarse instanceof HTMLButtonElement &&
-      img instanceof HTMLImageElement
+      botonPlantarse instanceof HTMLButtonElement
     ) {
       botonPedir.disabled = false;
       botonCartaSiguiente.disabled = true;
       botonPlantarse.disabled = false;
-      img.src =
-        "https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg"; // Se vuelve a mostrar la carta boca abajo
     }
   });
 }
