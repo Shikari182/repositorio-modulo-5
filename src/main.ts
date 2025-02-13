@@ -95,34 +95,53 @@ const actualizarPuntuacion = (nuevaPuntuacion: number): void => {
   puntuacion = nuevaPuntuacion;
 };
 
-/**
- * Gestiona el estado de la partida.
- * Si la puntuación es mayor a 7.5, muestra un mensaje de Game Over y bloquea todos los botones salvo "nuevaPartida".
- * Si la puntuación es exactamente 7.5, muestra el mensaje de victoria y bloquea el juego salvo "nuevaPartida".
+/** 
+ * Función para bloquear todos los botones del juego, excepto "nuevaPartida".
  */
+const bloquearBotones = (): void => {
+  const botones = document.querySelectorAll("button");
+  botones.forEach((boton) => {
+    if (boton instanceof HTMLButtonElement && boton.id !== "nuevaPartida") {
+      boton.disabled = true;
+    }
+  });
+};
 
-const bloquearBotonDameCarta = (estaBloqueado: boolean) => {
-  const botonDameCarta = document.getElementById('');
-
-  if (botonDameCarta !== null && botonDameCarta !== undefined && botonDameCarta instanceof HTMLButtonElement) {
-    botonDameCarta.disabled = estaBloqueado;
-  }
-}
-
-const gestionarPartida = (): void => {
-  if (puntuacion > 7.5) {
-    alert("Game Over! Te has pasado de 7 y medio");
-    // bloquearBotones();
-    bloquearBotonDameCarta(true);
-  } else if (puntuacion === 7.5) {
-    alert("¡Lo has clavado! ¡Enhorabuena!");
-    // bloquearBotones();
-    bloquearBotonDameCarta(true);
+/** 
+ * Función para habilitar (rehabilitar) los botones de juego: se habilita "pedirCarta" y "plantarse"
+ * y se deshabilita "cartaSiguiente" (por defecto).
+ */
+const habilitarJuego = (): void => {
+  const botonPedirCarta = document.getElementById("pedirCarta");
+  const botonCartaSiguiente = document.getElementById("cartaSiguiente");
+  const botonPlantarse = document.getElementById("plantarse");
+  if (
+    botonPedirCarta instanceof HTMLButtonElement &&
+    botonCartaSiguiente instanceof HTMLButtonElement &&
+    botonPlantarse instanceof HTMLButtonElement
+  ) {
+    botonPedirCarta.disabled = false;
+    botonCartaSiguiente.disabled = true;
+    botonPlantarse.disabled = false;
   }
 };
 
 /**
- * Función que retorna el mensaje según la puntuación al plantarse.
+ * Gestiona el estado de la partida: si se supera o se consigue 7.5,
+ * muestra el mensaje correspondiente y bloquea el juego.
+ */
+const gestionarPartida = (): void => {
+  if (puntuacion > 7.5) {
+    alert("Game Over! Te has pasado de 7 y medio");
+    bloquearBotones();
+  } else if (puntuacion === 7.5) {
+    alert("¡Lo has clavado! ¡Enhorabuena!");
+    bloquearBotones();
+  }
+};
+
+/**
+ * Función para obtener el mensaje al plantarse según la puntuación.
  */
 function obtenerMensajePlantarse(puntos: number): string {
   if (puntos < 4) {
@@ -138,83 +157,62 @@ function obtenerMensajePlantarse(puntos: number): string {
   }
 }
 
-
 // ----------------- EVENTOS -----------------
 
-const pedirCarta = () => {
+/** 
+ * Función para "Pedir Carta".
+ */
+const pedirCarta = (): void => {
   const numeroAleatorio = dameNumeroAleatorio();
   const carta = dameCarta(numeroAleatorio);
   console.log(`Carta pedida: ${carta}`);
 
-  // Mostrar la carta en la interfaz
   const urlCarta = obtenerUrlCarta(carta);
   mostrarUrlCarta(urlCarta);
 
-  // Obtener y sumar los puntos de la carta
   const puntosCarta = obtenerPuntosCarta(carta);
   const puntosSumados = sumarPuntos(puntosCarta);
   actualizarPuntuacion(puntosSumados);
   muestraPuntuacion();
   gestionarPartida();
-}
-
-// Botón "Pedir Carta"
-const botonPedirCarta = document.getElementById("pedirCarta");
-if (botonPedirCarta instanceof HTMLButtonElement) {
-  botonPedirCarta.addEventListener("click", () => {
-    pedirCarta();
-  });
-}
-
-// Botón "¿Cuál hubiese sido mi próxima carta?" (Carta Siguiente)
-// Inicialmente deshabilitado.
-const botonCartaSiguiente = document.getElementById("cartaSiguiente");
-if (botonCartaSiguiente instanceof HTMLButtonElement) {
-  botonCartaSiguiente.disabled = true;
-  botonCartaSiguiente.addEventListener("click", () => {
-    // En lugar de usar una función eliminada, usamos las funciones existentes:
-    const cartaFinal = dameCarta(dameNumeroAleatorio());
-    const urlCartaFinal = obtenerUrlCarta(cartaFinal);
-    mostrarUrlCarta(urlCartaFinal);
-    const puntosCartaFinal = obtenerPuntosCarta(cartaFinal);
-    // Se calcula la puntuación hipotética sin modificar la puntuación real
-    const hipoteticaPuntuacion = puntuacion + puntosCartaFinal;
-    // Una vez utilizada, se deshabilita para que solo se pueda usar una vez
-    botonCartaSiguiente.disabled = true;
-
-    if (hipoteticaPuntuacion > 7.5) {
-      alert(
-        `Con la próxima carta, te hubieses pasado de 7 y medio, alcanzando ${hipoteticaPuntuacion} puntos. ¡Habrías perdido el juego!`
-      );
-    } else if (hipoteticaPuntuacion === 7.5) {
-      alert(
-        "Con la próxima carta, te hubieses quedado justo en 7 y medio. ¡Habrías ganado el juego!"
-      );
-    } else {
-      alert(
-        `Con la próxima carta, solo tendrías ${hipoteticaPuntuacion} puntos, lo que no alcanza para 7 y medio.`
-      );
-    }
-  });
-}
-
-// Botón "Plantarse"
-const botonPlantarse = document.getElementById("plantarse");
-if (botonPlantarse instanceof HTMLButtonElement) {
-  botonPlantarse.addEventListener("click", () => {
-    // Se ha extraído la lógica a la función obtenerMensajePlantarse
-    alert(obtenerMensajePlantarse(puntuacion));
-    // Al plantarse se deshabilitan los botones de pedir carta y plantarse,
-    // y se habilita el botón de "¿Cuál hubiese sido mi próxima carta?" para usarse una única vez.
-    deshabilitarJuegoPlantarse();
-  });
-}
+};
 
 /**
- * Deshabilita los botones para seguir jugando y habilita el botón
- * de "¿Cuál hubiese sido mi próxima carta?" para que pueda usarse una única vez.
+ * Función para "¿Cuál hubiese sido mi próxima carta?".
  */
-function deshabilitarJuegoPlantarse(): void {
+const cartaSiguiente = (): void => {
+  const cartaFinal = dameCarta(dameNumeroAleatorio());
+  const urlCartaFinal = obtenerUrlCarta(cartaFinal);
+  mostrarUrlCarta(urlCartaFinal);
+  const puntosCartaFinal = obtenerPuntosCarta(cartaFinal);
+  const hipoteticaPuntuacion = puntuacion + puntosCartaFinal;
+
+  // Se deshabilita el botón para que solo se pueda usar una vez.
+  const botonCartaSiguiente = document.getElementById("cartaSiguiente");
+  if (botonCartaSiguiente instanceof HTMLButtonElement) {
+    botonCartaSiguiente.disabled = true;
+  }
+
+  if (hipoteticaPuntuacion > 7.5) {
+    alert(
+      `Con la próxima carta, te hubieses pasado de 7 y medio, alcanzando ${hipoteticaPuntuacion} puntos. ¡Habrías perdido el juego!`
+    );
+  } else if (hipoteticaPuntuacion === 7.5) {
+    alert(
+      "Con la próxima carta, te hubieses quedado justo en 7 y medio. ¡Habrías ganado el juego!"
+    );
+  } else {
+    alert(
+      `Con la próxima carta, solo tendrías ${hipoteticaPuntuacion} puntos, lo que no alcanza para 7 y medio.`
+    );
+  }
+};
+
+/**
+ * Función para "Plantarse".
+ */
+const plantarse = (): void => {
+  alert(obtenerMensajePlantarse(puntuacion));
   const botonPedir = document.getElementById("pedirCarta");
   const botonCartaSiguiente = document.getElementById("cartaSiguiente");
   const botonPlantarse = document.getElementById("plantarse");
@@ -226,35 +224,43 @@ function deshabilitarJuegoPlantarse(): void {
   ) {
     botonPedir.disabled = true;
     botonPlantarse.disabled = true;
-    botonCartaSiguiente.disabled = false; // Se habilita para una única consulta.
+    // Se habilita "cartaSiguiente" para un único uso.
+    botonCartaSiguiente.disabled = false;
   }
+};
+
+/**
+ * Función para "Nueva Partida".
+ */
+const nuevaPartida = (): void => {
+  actualizarPuntuacion(0);
+  muestraPuntuacion();
+  // Se reestablece la carta por defecto (boca abajo).
+  mostrarUrlCarta(
+    "https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg"
+  );
+  // Se rehabilitan los botones de juego.
+  habilitarJuego();
+};
+
+
+const botonPedirCarta = document.getElementById("pedirCarta");
+if (botonPedirCarta instanceof HTMLButtonElement) {
+  botonPedirCarta.addEventListener("click", pedirCarta);
 }
 
-// Botón "Nueva Partida"
+const botonCartaSiguiente = document.getElementById("cartaSiguiente");
+if (botonCartaSiguiente instanceof HTMLButtonElement) {
+  botonCartaSiguiente.disabled = true;
+  botonCartaSiguiente.addEventListener("click", cartaSiguiente);
+}
+
+const botonPlantarse = document.getElementById("plantarse");
+if (botonPlantarse instanceof HTMLButtonElement) {
+  botonPlantarse.addEventListener("click", plantarse);
+}
+
 const botonNuevaPartida = document.getElementById("nuevaPartida");
 if (botonNuevaPartida instanceof HTMLButtonElement) {
-  botonNuevaPartida.addEventListener("click", () => {
-    // Reiniciamos la puntuación y el estado del juego usando las funciones ya creadas
-    actualizarPuntuacion(0);
-    muestraPuntuacion();
-    // Reestablecemos la carta por defecto
-    mostrarUrlCarta(
-      "https://raw.githubusercontent.com/Lemoncode/fotos-ejemplos/main/cartas/back.jpg"
-    );
-
-    // Rehabilitamos los botones de juego
-    const botonPedir = document.getElementById("pedirCarta");
-    const botonCartaSiguiente = document.getElementById("cartaSiguiente");
-    const botonPlantarse = document.getElementById("plantarse");
-
-    if (
-      botonPedir instanceof HTMLButtonElement &&
-      botonCartaSiguiente instanceof HTMLButtonElement &&
-      botonPlantarse instanceof HTMLButtonElement
-    ) {
-      botonPedir.disabled = false;
-      botonCartaSiguiente.disabled = true;
-      botonPlantarse.disabled = false;
-    }
-  });
+  botonNuevaPartida.addEventListener("click", nuevaPartida);
 }
