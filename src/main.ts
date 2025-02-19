@@ -95,6 +95,13 @@ const actualizarPuntuacion = (nuevaPuntuacion: number): void => {
   puntuacion = nuevaPuntuacion;
 };
 
+/**
+ * Función para obtener la hipotética puntuación si se pidiera otra carta.
+ */
+function obtenerHipoteticaPuntuacion(puntosCarta: number): number {
+  return puntuacion + puntosCarta;
+}
+
 /** 
  * Función para bloquear todos los botones del juego, excepto "nuevaPartida".
  */
@@ -185,7 +192,7 @@ const cartaSiguiente = (): void => {
   const urlCartaFinal = obtenerUrlCarta(cartaFinal);
   mostrarUrlCarta(urlCartaFinal);
   const puntosCartaFinal = obtenerPuntosCarta(cartaFinal);
-  const hipoteticaPuntuacion = puntuacion + puntosCartaFinal;
+  const hipoteticaPuntuacion = obtenerHipoteticaPuntuacion(puntosCartaFinal);
 
   // Se deshabilita el botón para que solo se pueda usar una vez.
   const botonCartaSiguiente = document.getElementById("cartaSiguiente");
@@ -242,7 +249,6 @@ const nuevaPartida = (): void => {
   // Se rehabilitan los botones de juego.
   habilitarJuego();
 };
-
 
 const botonPedirCarta = document.getElementById("pedirCarta");
 if (botonPedirCarta instanceof HTMLButtonElement) {
