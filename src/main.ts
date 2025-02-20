@@ -102,6 +102,29 @@ function obtenerHipoteticaPuntuacion(puntosCarta: number): number {
   return puntuacion + puntosCarta;
 }
 
+/**
+ * Función que devuelve el mensaje correspondiente según la hipotética puntuación.
+ */
+const devolverMensajeHipoteticaPuntuacion = (hipoteticaPuntuacion: number): string => {
+  if (hipoteticaPuntuacion > 7.5) {
+    return `Con la próxima carta, te hubieses pasado de 7 y medio, alcanzando ${hipoteticaPuntuacion} puntos. ¡Habrías perdido el juego!`;
+  } else if (hipoteticaPuntuacion === 7.5) {
+    return "Con la próxima carta, te hubieses quedado justo en 7 y medio. ¡Habrías ganado el juego!";
+  } else {
+    return `Con la próxima carta, solo tendrías ${hipoteticaPuntuacion} puntos, lo que no alcanza para 7 y medio.`;
+  }
+};
+
+/**
+ * Función para deshabilitar el botón "cartaSiguiente".
+ */
+const deshabilitarBotonCartaSiguiente = (): void => {
+  const botonCartaSiguiente = document.getElementById("cartaSiguiente");
+  if (botonCartaSiguiente instanceof HTMLButtonElement) {
+    botonCartaSiguiente.disabled = true;
+  }
+};
+
 /** 
  * Función para bloquear todos los botones del juego, excepto "nuevaPartida".
  */
@@ -191,28 +214,15 @@ const cartaSiguiente = (): void => {
   const cartaFinal = dameCarta(dameNumeroAleatorio());
   const urlCartaFinal = obtenerUrlCarta(cartaFinal);
   mostrarUrlCarta(urlCartaFinal);
+
   const puntosCartaFinal = obtenerPuntosCarta(cartaFinal);
   const hipoteticaPuntuacion = obtenerHipoteticaPuntuacion(puntosCartaFinal);
 
   // Se deshabilita el botón para que solo se pueda usar una vez.
-  const botonCartaSiguiente = document.getElementById("cartaSiguiente");
-  if (botonCartaSiguiente instanceof HTMLButtonElement) {
-    botonCartaSiguiente.disabled = true;
-  }
+  deshabilitarBotonCartaSiguiente();
 
-  if (hipoteticaPuntuacion > 7.5) {
-    alert(
-      `Con la próxima carta, te hubieses pasado de 7 y medio, alcanzando ${hipoteticaPuntuacion} puntos. ¡Habrías perdido el juego!`
-    );
-  } else if (hipoteticaPuntuacion === 7.5) {
-    alert(
-      "Con la próxima carta, te hubieses quedado justo en 7 y medio. ¡Habrías ganado el juego!"
-    );
-  } else {
-    alert(
-      `Con la próxima carta, solo tendrías ${hipoteticaPuntuacion} puntos, lo que no alcanza para 7 y medio.`
-    );
-  }
+  const mensaje = devolverMensajeHipoteticaPuntuacion(hipoteticaPuntuacion);
+  alert(mensaje);
 };
 
 /**
